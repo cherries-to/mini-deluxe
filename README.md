@@ -1,7 +1,7 @@
 # Mini-deluxe
 
-Mini-web server for Bun.js. :P 
-This little thing extends `Bun.serve()` and creates a simple wrapper with useful features such as a public directory, websocket support built-in, etc.
+Mini-web server for Bun.js.
+This minimal server thing extends `Bun.serve()` and creates a simple wrapper with useful features such as a public directory, websocket support built-in, etc.
 
 ## Usage
 
