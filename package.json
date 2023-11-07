@@ -1,5 +1,7 @@
 {
-  "name": "silly-web-server",
+  "name": "mini-deluxe",
+  "description": "A minimal HTTP server library by cherries.to devs",
+  "version": "0.0.1",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
