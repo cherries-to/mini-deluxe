@@ -1,4 +1,5 @@
 import {
+  RouteArguments,
   createCookie,
   editCookie,
   pageBuilder,
@@ -14,33 +15,41 @@ const m = miniDeluxe.miniServer({
   handlers: [
     {
       urlPath: "/",
-      handler: async function (req: Request) {
+      handler: async function (data: RouteArguments) {
         return pageBuilder(
           "<h1>New Webs</h1><small><em>sponsored by cherries.to & tuck</em></small>"
         );
       },
     },
     {
+      urlPath: "/test",
+      handler: async function (data: RouteArguments) {
+        return new Response(JSON.stringify(data.params), {
+          headers: { "content-type": "application/json" },
+        });
+      },
+    },
+    {
       urlPath: "/turtle",
-      handler: async function (req: Request) {
+      handler: async function (data: RouteArguments) {
         return rawFile("../public/sample.png");
       },
     },
     {
       urlPath: "/cookie/make",
-      handler: async function (req: Request) {
+      handler: async function (data: RouteArguments) {
         return createCookie("cherries.to", "yes!");
       },
     },
     {
       urlPath: "/cookie/edit",
-      handler: async function (req: Request) {
+      handler: async function (data: RouteArguments) {
         return editCookie("cherries.to", "edited");
       },
     },
     {
       urlPath: "/error",
-      handler: async function (req: Request) {
+      handler: async function (data: RouteArguments) {
         throw new TypeError("Bad Error");
       },
     },

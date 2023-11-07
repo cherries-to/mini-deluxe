@@ -25,6 +25,13 @@ export function fileOnlyHandlers(url: URL) {
   return new Response(Bun.file(url.pathname));
 }
 
+export interface RouteArguments {
+  req: Request;
+  url: URL;
+  route: Route;
+  params: URLSearchParams;
+}
+
 export function generateRequestHandler(
   handlers: any[],
   fofHandler: Function = returnNotFound
@@ -55,8 +62,10 @@ export function generateRequestHandler(
     // If there's no such route, show a 404
     if (!route) return fofHandler();
 
+    const params = new URLSearchParams(url.search)
+    
     // Run the route's handler
-    return await route?.handler({ req, url, route });
+    return await route?.handler({ req, url, route, params } as RouteArguments);
   }
 
   return requestHandler;
