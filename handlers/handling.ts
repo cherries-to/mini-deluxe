@@ -25,8 +25,10 @@ export function fileOnlyHandlers(url: URL) {
   return new Response(Bun.file(url.pathname));
 }
 
-// austin genius big brain iq momento here
-export function generateRequestHandler(handlers: any[], fofHandler: Function = returnNotFound) {
+export function generateRequestHandler(
+  handlers: any[],
+  fofHandler: Function = returnNotFound
+) {
   async function requestHandler(req: Request): Promise<Response> {
     // Generate URL from request data
     const url = new URL(req.url);
