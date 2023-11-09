@@ -87,7 +87,15 @@ export function fileOnlyReqHandler(
     let urlPath = url.pathname.substring(prefix.length);
 
     // default handlers built into the program
-    if (urlPath.endsWith("/") || urlPath === "") {
+    if (urlPath === "") {
+      // redirect to /
+      return new Response("Redirect", {
+        status: 301,
+        statusText: "Moved",
+        headers: { Location: prefix + "/" },
+      });
+    }
+    if (urlPath.endsWith("/")) {
       urlPath = "/index.html";
     }
 
