@@ -1,10 +1,15 @@
-import { BunFile } from "bun";
-import path from "path";
-
-export interface ReqHandler {
-  urlPath: string;
-  handler: CallableFunction;
+interface FileOnlyOptions {
+  enabled: boolean;
+  directory: string;
 }
+
+interface ReqHandler {
+  urlPath: string;
+  handler?: CallableFunction;
+  fomOptions?: FileOnlyOptions;
+}
+
+export type { ReqHandler, FileOnlyOptions };
 
 export function returnNotFound() {
   return new Response("404 Not Found", {
@@ -13,22 +18,10 @@ export function returnNotFound() {
   });
 }
 
-export interface Route {
-  /**
-   * The path of the route, e.g. `/` or `/chat`.
-   */
-  urlPath: string;
-  handler: CallableFunction;
-}
-
-export function fileOnlyHandlers(url: URL) {
-  return new Response(Bun.file(url.pathname));
-}
-
 export interface RouteArguments {
   req: Request;
   url: URL;
-  route: Route;
+  route: ReqHandler;
   params: URLSearchParams;
 }
 
@@ -48,12 +41,19 @@ export function generateRequestHandler(
       urlPath = "/index.html";
     }
 
-    let route: Route | null;
+    let route: ReqHandler | null;
     try {
-      route = handlers.find((r: Route) => {
-        if (r.urlPath.endsWith(url.pathname))
-          // if (r.path.exec(url.pathname) !== null && r.method === req.method)
-          return r;
+      route = handlers.find((r: ReqHandler) => {
+        if (r.fomOptions !== undefined && r.fomOptions.enabled === true) {
+          // console.log("fom found:", r);
+          if (url.pathname.startsWith(r.urlPath))
+            // if (r.path.exec(url.pathname) !== null && r.method === req.method)
+            return r;
+        } else {
+          if (r.urlPath.endsWith(url.pathname))
+            // if (r.path.exec(url.pathname) !== null && r.method === req.method)
+            return r;
+        }
       });
     } catch (e: any) {
       return new Response(e, { status: 500 });
@@ -62,10 +62,12 @@ export function generateRequestHandler(
     // If there's no such route, show a 404
     if (!route) return fofHandler();
 
-    const params = new URLSearchParams(url.search)
-    
+    const params = new URLSearchParams(url.search);
+
     // Run the route's handler
-    return await route?.handler({ req, url, route, params } as RouteArguments);
+    if (route.handler !== undefined)
+      return await route.handler({ req, url, route, params } as RouteArguments);
+    else return fofHandler();
   }
 
   return requestHandler;
@@ -73,18 +75,23 @@ export function generateRequestHandler(
 
 import { join } from "path";
 
-export function fileOnlyReqHandler(staticFilePath: string = "public") {
+export function fileOnlyReqHandler(
+  prefix: string = "/public",
+  staticFilePath: string = "public"
+) {
   async function requestHandler(req: Request) {
     // Generate URL from request data
     const url = new URL(req.url);
 
     // Fall back to public directory
-    let urlPath = url.pathname;
+    let urlPath = url.pathname.substring(prefix.length);
 
     // default handlers built into the program
-    if (urlPath.endsWith("/")) {
+    if (urlPath.endsWith("/") || urlPath === "") {
       urlPath = "/index.html";
     }
+
+    // console.log(prefix, staticFilePath, urlPath);
 
     return new Response(Bun.file(join(staticFilePath, urlPath)));
   }
@@ -112,6 +119,17 @@ export function createCookie(name: string, value: string) {
 export function editCookie(name: string, value: string) {
   return new Response("Cookie Edited", {
     headers: { Cookie: `${name}=${value}` },
+    status: 301,
+    statusText: "Moved",
+  });
+}
+
+/// Delete a cookie
+export function deleteCookie(name: string, value: string) {
+  return new Response("Cookie Edited", {
+    headers: {
+      "Set-Cookie": `${name}=${value}; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`,
+    },
     status: 301,
     statusText: "Moved",
   });

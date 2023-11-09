@@ -8,7 +8,6 @@ import {
 
 interface MiniDxServerOptions {
   enableWs?: boolean;
-  fileOnlyMode?: boolean;
   staticFilePath?: string;
 }
 
@@ -23,7 +22,7 @@ interface MiniDxServerConfig {
 export function miniServer(config: MiniDxServerConfig): Server {
   // Assign default port
   if (!config.port) config.port = 3000;
-
+  // Assign default FoF handler
   if (!config.fofHandler) config.fofHandler = returnNotFound;
   // Assign default error handler
   if (!config.errorHandler)
@@ -54,23 +53,31 @@ export function miniServer(config: MiniDxServerConfig): Server {
   if (!config.options)
     config.options = {
       enableWs: false,
-      fileOnlyMode: false,
       staticFilePath: "public",
     };
 
-  if (config.handlers === undefined && config.options.fileOnlyMode !== true) {
+  if (config.handlers === undefined) {
     /**
      * This text shows up somewhere
      */
     throw new Error("No handlers assigned to your server");
+  } else {
+    config.handlers = config.handlers.map((h) => {
+      if (h.fomOptions?.enabled === true) {
+        h.handler = fileOnlyReqHandler(h.urlPath, h.fomOptions.directory);
+        return h;
+      } else {
+        return h;
+      }
+    });
   }
   if (!config.handlers) config.handlers = [];
 
   // Generate request handler
-  const fetchHandler =
-    config.options.fileOnlyMode == false
-      ? generateRequestHandler(config.handlers, config.fofHandler)
-      : fileOnlyReqHandler(config.options.staticFilePath);
+  const fetchHandler = generateRequestHandler(
+    config.handlers,
+    config.fofHandler
+  );
 
   // Return final server
   return Bun.serve({
