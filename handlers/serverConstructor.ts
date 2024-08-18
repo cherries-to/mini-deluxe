@@ -85,4 +85,6 @@ export function miniServer(config: MiniDxServerConfig): Server {
     fetch: fetchHandler,
     error: config.errorHandler,
   });
+
+  console.log(`Started server 🚀\nPort: ${config.port}\nLocal Link: http://127.0.0.1/${config.port}`)
 }
