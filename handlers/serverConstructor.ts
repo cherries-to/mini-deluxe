@@ -80,11 +80,13 @@ export function miniServer(config: MiniDxServerConfig): Server {
   );
 
   // Return final server
-  return Bun.serve({
+  const server = Bun.serve({
     port: config.port,
     fetch: fetchHandler,
     error: config.errorHandler,
   });
 
-  console.log(`Started server 🚀\nPort: ${config.port}\nLocal Link: http://127.0.0.1/${config.port}`)
+  console.log(`Started server 🚀\nPort: ${config.port}\nLocal Link: http://127.0.0.1/${config.port}`);
+
+  return server;
 }
