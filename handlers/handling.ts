@@ -79,6 +79,9 @@ export function fileOnlyReqHandler(
   prefix: string = "/public",
   staticFilePath: string = "public"
 ) {
+  if (staticFilePath.endsWith('/')) {
+    staticFilePath = staticFilePath.substring(0, staticFilePath.length - 1);
+  }
   async function requestHandler(req: Request) {
     // Generate URL from request data
     const url = new URL(req.url);
@@ -99,7 +102,7 @@ export function fileOnlyReqHandler(
       urlPath = "/index.html";
     }
 
-    // console.log(prefix, staticFilePath, urlPath);
+    console.log(prefix + "\n" + staticFilePath + "\n" + urlPath);
 
     return new Response(Bun.file(join(staticFilePath, urlPath)));
   }
