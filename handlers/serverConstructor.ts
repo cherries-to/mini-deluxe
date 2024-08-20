@@ -63,6 +63,11 @@ export function miniServer(config: MiniDxServerConfig): Server {
     throw new Error("No handlers assigned to your server");
   } else {
     config.handlers = config.handlers.map((h) => {
+      // fix the users formatting on the handler if it is incorrect
+      
+      if (h.urlPath.endsWith('/')) {
+        h.urlPath = h.urlPath.substring(0, h.urlPath.length - 1)
+      }
       if (h.fomOptions?.enabled === true) {
         h.handler = fileOnlyReqHandler(h.urlPath, h.fomOptions.directory);
         return h;
